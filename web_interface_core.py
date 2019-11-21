@@ -1,4 +1,5 @@
 import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 from bs4 import BeautifulSoup
 import urllib3
 import json
@@ -26,6 +27,8 @@ class DRInterface():
         self.get_is_usb_connected_url = self.URL + "/api/is_usb_connected"
         self.get_models_url = self.URL + "/api/models"
         self.upload_models_url = self.URL + "/api/uploadModels"
+        self.upload_model_list_url = self.URL + "/api/uploaded_model_list"
+        self.manual_drive_url = self.URL + "/api/manual_drive"
 
         # state variables
         self.manual = True
@@ -99,6 +102,9 @@ class DRInterface():
     def get_models(self):
         return json.loads(self.session.get(self.get_models_url, headers=self.headers, verify=False).text)
 
+    def get_uploaded_models(self):
+        return json.loads(self.session.get(self.upload_model_list_url, headers=self.headers, verify=False).text)
+
     def set_autonomous_mode(self):
         # Set the car to use the autonomous mode and not care about input from this program
         self.stop_car()
@@ -114,3 +120,19 @@ class DRInterface():
     def load_model(self, model_name):
         model_url = self.URL + "/api/models/" + model_name + "/model"
         return json.loads(self.session.put(model_url, headers=self.headers, verify=False).text)
+
+    def manual_drive(self):
+        data = {"angle": 0, "throttle": 0}
+        return json.loads(self.session.put(self.manual_drive_url, json=data, headers=self.headers, verify=False).text)
+
+    def upload_model(self, model_zip_path, model_name):
+        model_file = open(model_zip_path, 'rb')
+        headers = self.headers
+        multipart_data = MultipartEncoder(
+            fields={
+                # a file upload field
+                'file': (model_name, model_file, None)
+            }
+        )
+        headers['content-type'] = multipart_data.content_type
+        return json.loads(self.session.put(self.upload_models_url, data=multipart_data, headers=headers, verify=False).text)

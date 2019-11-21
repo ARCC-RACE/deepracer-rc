@@ -1,6 +1,6 @@
 import web_interface_core
 import threading
-import os
+import argparse
 import inputs  # https://inputs.readthedocs.io/en/latest/user/intro.html
 
 steer = 0
@@ -33,7 +33,12 @@ def event_loop():
 
 def main():
     """Process all events forever."""
-    client = web_interface_core.DRInterface("uGRqirr3", "192.168.1.101")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("ip")
+    parser.add_argument("password")
+    args = parser.parse_args()
+    print("Logging onto " + args.ip + " with password: " + args.password)
+    client = web_interface_core.DRInterface(args.password, args.ip)
     client.log_on()
     client.set_manual_mode()
     client.start_car()

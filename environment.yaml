@@ -39,5 +39,6 @@ dependencies:
   - zlib=1.2.11=h7b6447c_3
   - pip:
     - inputs==0.5
+    - requests-toolbelt==0.9.1
 prefix: /home/michael/anaconda3/envs/league_env
 
